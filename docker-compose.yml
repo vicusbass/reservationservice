@@ -1,0 +1,21 @@
+version: '3'
+services:
+  web:
+    build: ./src
+    command: uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000
+    volumes:
+      - ./src/:/usr/src/app/
+    ports:
+      - 8002:8000
+    environment:
+      - DATABASE_URL=postgresql://fastapi:password@postgres/reservations_dev
+  postgres:
+    image: postgres:12.1-alpine # use latest official postgres version
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/ # persist data even if container shuts down
+    environment:
+      - POSTGRES_USER=fastapi
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=reservations_dev
+volumes:
+  postgres_data: # named volumes can be managed easier using docker-compose
