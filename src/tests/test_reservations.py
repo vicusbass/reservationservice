@@ -74,7 +74,7 @@ def test_get_all_reservations(create_reservation, test_app_with_db):
     _, response = create_reservation
     assert "id" in response
     reservation_id = response["id"]
-    get_response = test_app_with_db.get(f"/reservations")
+    get_response = test_app_with_db.get("/reservations")
     assert get_response.status_code == 200
     reservations = get_response.json()
     assert len(list(filter(lambda r: r["id"] == reservation_id, reservations))) == 1
