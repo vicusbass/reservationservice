@@ -61,3 +61,30 @@ def test_get_reservation(create_reservation, test_app_with_db):
     assert get_response.status_code == 200
     reservation = get_response.json()
     assert reservation == response
+
+
+def test_get_nonexisting_reservation(test_app_with_db):
+    response = test_app_with_db.get("/reservations/-1")
+    assert response.status_code == 404
+    reservation = response.json()
+    assert reservation["detail"] == "Reservation not found"
+
+
+def test_get_all_reservations(create_reservation, test_app_with_db):
+    _, response = create_reservation
+    assert "id" in response
+    reservation_id = response["id"]
+    get_response = test_app_with_db.get(f"/reservations")
+    assert get_response.status_code == 200
+    reservations = get_response.json()
+    assert len(list(filter(lambda r: r["id"] == reservation_id, reservations))) == 1
+
+
+def test_remove_reservation(create_reservation, test_app_with_db):
+    _, response = create_reservation
+    assert "id" in response
+    reservation_id = response["id"]
+    delete_response = test_app_with_db.delete(f"/reservations/{reservation_id}")
+    assert delete_response.status_code == 204
+    response = test_app_with_db.get(f"/reservations/{reservation_id}")
+    assert response.status_code == 404
