@@ -30,3 +30,5 @@ RUN set -eux \
 
 # add app
 COPY . /usr/src/app
+
+ENTRYPOINT ["/usr/src/app/entrypoint.sh"]

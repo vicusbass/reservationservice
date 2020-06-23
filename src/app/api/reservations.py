@@ -1,13 +1,13 @@
 from fastapi import APIRouter
 
 from app.api import crud
-from app.api.models import ReservationDB, ReservationSchema
+from app.models.pydantic import ReservationResponseSchema, ReservationPayloadSchema
 
 router = APIRouter()
 
 
-@router.post("/", response_model=ReservationDB, status_code=201)
-async def create_reservation(payload: ReservationSchema):
+@router.post("", response_model=ReservationResponseSchema, status_code=201)
+async def create_reservation(payload: ReservationPayloadSchema) -> ReservationResponseSchema:
     reservation_id = await crud.post(payload)
     response = {
         "id": reservation_id,
@@ -18,3 +18,9 @@ async def create_reservation(payload: ReservationSchema):
         "guests": payload.guests,
     }
     return response
+
+
+@router.get("/{reservation_id}", response_model=ReservationResponseSchema)
+async def get_reservation(reservation_id: int) -> ReservationResponseSchema:
+    reservation = await crud.get(reservation_id)
+    return reservation
