@@ -1,13 +1,15 @@
-from fastapi import APIRouter
+from typing import List
+
+from fastapi import APIRouter, HTTPException
 
 from app.api import crud
-from app.api.models import ReservationDB, ReservationSchema
+from app.models.pydantic import ReservationResponseSchema, ReservationPayloadSchema
 
 router = APIRouter()
 
 
-@router.post("/", response_model=ReservationDB, status_code=201)
-async def create_reservation(payload: ReservationSchema):
+@router.post("", response_model=ReservationResponseSchema, status_code=201)
+async def create_reservation(payload: ReservationPayloadSchema) -> ReservationResponseSchema:
     reservation_id = await crud.post(payload)
     response = {
         "id": reservation_id,
@@ -18,3 +20,24 @@ async def create_reservation(payload: ReservationSchema):
         "guests": payload.guests,
     }
     return response
+
+
+@router.get("/{reservation_id}", response_model=ReservationResponseSchema)
+async def get_reservation(reservation_id: int) -> ReservationResponseSchema:
+    reservation = await crud.get(reservation_id)
+    if not reservation:
+        raise HTTPException(status_code=404, detail="Reservation not found")
+    return reservation
+
+
+@router.get("", response_model=List[ReservationResponseSchema])
+async def get_reservations() -> List[ReservationResponseSchema]:
+    return await crud.get_all()
+
+
+@router.delete("/{reservation_id}", status_code=204)
+async def delete_reservation(reservation_id: int) -> ReservationResponseSchema:
+    reservation = await crud.get(reservation_id)
+    if not reservation:
+        raise HTTPException(status_code=404, detail="Reservation not found")
+    return await crud.delete(reservation_id)

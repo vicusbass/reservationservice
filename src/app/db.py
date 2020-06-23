@@ -1,22 +1,33 @@
+import logging
 import os
 
-from databases import Database
-from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, DateTime
+from fastapi import FastAPI
+from tortoise import Tortoise, run_async
+from tortoise.contrib.fastapi import register_tortoise
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+log = logging.getLogger(__name__)
 
-engine = create_engine(DATABASE_URL)
-metadata = MetaData()
 
-reservations = Table(
-    "reservations",
-    metadata,
-    Column("id", Integer, primary_key=True),
-    Column("restaurant_id", String(50)),
-    Column("table_id", String(50)),
-    Column("start", DateTime, nullable=False),
-    Column("end", DateTime, nullable=False),
-    Column("guests", Integer),
-)
+def init_db(app: FastAPI) -> None:
+    register_tortoise(
+        app,
+        db_url=os.environ.get("DATABASE_URL"),
+        modules={"models": ["app.models.tortoise"]},
+        generate_schemas=False,
+        add_exception_handlers=True,
+    )
 
-database = Database(DATABASE_URL)
+
+async def generate_schema() -> None:
+    log.info("Initializing Tortoise...")
+
+    await Tortoise.init(
+        db_url=os.environ.get("DATABASE_URL"), modules={"models": ["models.tortoise"]}
+    )
+    log.info("Generating db schema")
+    await Tortoise.generate_schemas()
+    await Tortoise.close_connections()
+
+
+if __name__ == '__main__':
+    run_async(generate_schema())

@@ -8,14 +8,19 @@ services:
     ports:
       - 8002:8000
     environment:
-      - DATABASE_URL=postgresql://fastapi:password@postgres/reservations_dev
-  postgres:
-    image: postgres:12.1-alpine # use latest official postgres version
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/ # persist data even if container shuts down
+      - ENVIRONMENT=dev
+      - TESTING=0
+      - DATABASE_URL=postgres://postgres:postgres@web-db:5432/web_dev
+      - DATABASE_TEST_URL=postgres://postgres:postgres@web-db:5432/web_test
+    depends_on:
+      - web-db
+
+  web-db:
+    build:
+      context: ./src/db
+      dockerfile: Dockerfile
+    ports:
+      - 5432:5432
     environment:
-      - POSTGRES_USER=fastapi
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=reservations_dev
-volumes:
-  postgres_data: # named volumes can be managed easier using docker-compose
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
