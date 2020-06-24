@@ -83,4 +83,4 @@ jobs:
       - name: Flake8
         run: docker exec reservationservice python -m flake8 .
       - name: Black
-        run: docker exec reservationservice python -m black . --check
+        run: docker exec reservationservice python -m black . --check -S -l 100
