@@ -19,6 +19,10 @@ docker-compose up -d web web-db
 
 `docker-compose exec web python app/db.py`
 
+## API documentation
+
+The API documentation is located [here](http://localhost:8002/docs)
+
 ## Performance benchmark
 
 Create 100 reservations with high load, with 10 concurrent users
