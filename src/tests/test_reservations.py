@@ -64,10 +64,16 @@ def test_get_reservation(create_reservation, test_app_with_db):
 
 
 def test_get_nonexisting_reservation(test_app_with_db):
-    response = test_app_with_db.get("/reservations/-1")
+    response = test_app_with_db.get("/reservations/999999999")
     assert response.status_code == 404
     reservation = response.json()
     assert reservation["detail"] == "Reservation not found"
+
+
+def test_get_id_zero(test_app_with_db):
+    response = test_app_with_db.get("/reservations/0")
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["msg"] == "ensure this value is greater than 0"
 
 
 def test_get_all_reservations(create_reservation, test_app_with_db):

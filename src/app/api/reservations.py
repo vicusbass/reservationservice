@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Path
 
 from app.api import crud
 from app.models.pydantic import ReservationResponseSchema, ReservationPayloadSchema
@@ -23,7 +23,7 @@ async def create_reservation(payload: ReservationPayloadSchema) -> ReservationRe
 
 
 @router.get("/{reservation_id}", response_model=ReservationResponseSchema)
-async def get_reservation(reservation_id: int) -> ReservationResponseSchema:
+async def get_reservation(reservation_id: int = Path(..., gt=0)) -> ReservationResponseSchema:
     reservation = await crud.get(reservation_id)
     if not reservation:
         raise HTTPException(status_code=404, detail="Reservation not found")
